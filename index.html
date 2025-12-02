@@ -2,73 +2,77 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>全息粒子手势交互系统 Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@900&family=Pacifico&family=Roboto+Mono:wght@700&display=swap" rel="stylesheet">
+    <title>双手实体动态交互系统 Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; overflow: hidden; background-color: #050505; font-family: 'Segoe UI', Roboto, sans-serif; color: white; }
-        #container { position: relative; width: 100vw; height: 100vh; background: radial-gradient(circle at center, #1a1a2e, #000);}
+        body { margin: 0; overflow: hidden; background-color: #050505; font-family: 'Roboto', sans-serif; color: white; }
+        #container { position: relative; width: 100vw; height: 100vh; background: radial-gradient(circle at center, #1b1b2f, #000000);}
         #input-video { display: none; }
         
-        /* UI 面板 */
+        /* 侧边栏 */
         #ui-layer {
-            position: absolute; top: 20px; left: 20px; width: 320px; max-height: 90vh;
-            background: rgba(10, 15, 30, 0.9); padding: 20px; border-radius: 12px;
-            border: 1px solid rgba(0, 210, 255, 0.3);
-            box-shadow: 0 0 20px rgba(0, 150, 255, 0.15);
-            backdrop-filter: blur(12px); z-index: 100; overflow-y: auto;
-            scrollbar-width: thin; scrollbar-color: #00f2ff #111;
+            position: absolute; top: 20px; left: 20px; width: 340px; max-height: 90vh;
+            background: rgba(20, 23, 35, 0.95); padding: 25px; border-radius: 16px;
+            border: 1px solid rgba(0, 255, 170, 0.3);
+            box-shadow: 0 0 30px rgba(0, 255, 170, 0.1);
+            z-index: 100; overflow-y: auto;
         }
 
-        /* 滚动条样式 */
-        #ui-layer::-webkit-scrollbar { width: 6px; }
-        #ui-layer::-webkit-scrollbar-track { background: #111; }
-        #ui-layer::-webkit-scrollbar-thumb { background: #00f2ff; border-radius: 3px; }
+        h2 { margin: 0 0 15px 0; font-family: 'Orbitron', sans-serif; color: #00ffaa; letter-spacing: 2px; border-bottom: 1px solid rgba(0,255,170,0.2); padding-bottom: 10px;}
         
-        h2 { margin: 0 0 10px 0; font-size: 16px; color: #00f2ff; text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px solid rgba(0,242,255,0.2); padding-bottom: 10px;}
-        h3 { font-size: 12px; color: #888; margin: 15px 0 5px 0; text-transform: uppercase; }
-
-        /* 输入控件通用样式 */
-        input[type="text"], select, input[type="number"] { 
-            width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #334; 
-            border-radius: 4px; background: #0f1220; color: #fff; outline: none; transition: border 0.3s;
+        .status-bar { margin-bottom: 15px; font-size: 12px; color: #888; display: flex; justify-content: space-between;}
+        
+        input { 
+            width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #334; 
+            border-radius: 6px; background: #0f1220; color: #fff; outline: none; transition: border 0.3s;
         }
-        input:focus { border-color: #00f2ff; }
-        
-        /* 颜色选择器容器 */
-        .color-picker-wrap { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 13px; color: #ccc;}
-        input[type="color"] { border: none; width: 40px; height: 25px; cursor: pointer; background: none;}
+        input:focus { border-color: #00ffaa; }
 
-        /* 滑块 */
-        input[type="range"] { width: 100%; cursor: pointer; accent-color: #00f2ff; }
-
-        button {
-            width: 100%; padding: 10px; border: none; border-radius: 4px; margin-top: 5px;
+        /* 录制按钮 - 切换状态 */
+        #record-btn {
+            width: 100%; padding: 15px; border: none; border-radius: 6px;
             background: linear-gradient(90deg, #00c6ff, #0072ff); color: white; 
             font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
-            transition: transform 0.2s;
+            transition: all 0.3s; font-family: 'Orbitron', sans-serif;
         }
-        button:hover { transform: scale(1.02); filter: brightness(1.2); }
-        button.secondary { background: #333; font-size: 10px; padding: 6px; margin-top: 10px; border: 1px solid #444;}
+        #record-btn.recording {
+            background: linear-gradient(90deg, #ff4444, #cc0000);
+            animation: pulse-red 1s infinite;
+        }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(255, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); } }
 
-        /* 相似度仪表盘 */
-        .meter-container { margin-top: 15px; margin-bottom: 5px; }
-        .meter-bg { width: 100%; height: 6px; background: #333; border-radius: 3px; margin-top: 5px; overflow: hidden; }
-        .meter-fill { height: 100%; width: 0%; background: #00f2ff; transition: width 0.1s linear; }
+        /* 倒计时遮罩 */
+        #countdown-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center;
+            z-index: 200;
+        }
+        #countdown-text {
+            font-family: 'Orbitron', sans-serif; font-size: 150px; font-weight: 900;
+            color: #00ffaa; text-shadow: 0 0 50px #00ffaa;
+            animation: scale-up 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite;
+        }
+        @keyframes scale-up { 0% { transform: scale(0.5); opacity: 0; } 50% { opacity: 1; } 100% { transform: scale(1.2); opacity: 0; } }
 
-        /* 列表 */
-        .list-wrap { max-height: 150px; overflow-y: auto; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;}
-        li { padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; font-size: 12px;}
-        .del-btn { color: #ff4444; cursor: pointer; font-weight: bold; padding: 0 5px; }
+        .list-wrap { margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
+        .gesture-item { 
+            background: rgba(255,255,255,0.05); padding: 10px; margin-bottom: 8px; border-radius: 4px; 
+            display: flex; justify-content: space-between; align-items: center; font-size: 13px;
+        }
+        .del-btn { color: #ff5555; cursor: pointer; padding: 5px; font-weight: bold;}
 
-        /* 主显示文字 */
+        /* 相似度条 */
+        .match-info { margin-top: 15px; font-size: 12px; color: #aaa; }
+        .bar-bg { width: 100%; height: 6px; background: #333; margin-top: 5px; border-radius: 3px; overflow: hidden;}
+        .bar-fill { height: 100%; width: 0%; background: #00ffaa; transition: width 0.1s; }
+
+        /* 屏幕中央显示 */
         #main-output {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            white-space: nowrap; pointer-events: none; opacity: 0; 
-            transition: opacity 0.2s, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 50; 
-            /* 默认样式，会被JS覆盖 */
-            font-size: 100px; font-weight: 900; color: #ffffff;
-            text-shadow: 0 0 20px rgba(255,255,255,0.5);
+            font-family: 'Orbitron', sans-serif; font-size: 80px; font-weight: 900; 
+            color: #fff; text-shadow: 0 0 30px rgba(0, 255, 170, 0.8);
+            opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 50; text-align: center; white-space: nowrap;
         }
         #main-output.active { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
     </style>
@@ -83,384 +87,409 @@
 <div id="container">
     <video id="input-video"></video>
     
+    <div id="countdown-overlay">
+        <div id="countdown-text">3</div>
+    </div>
+    
     <div id="ui-layer">
-        <h2>交互控制台</h2>
+        <h2>Dual-Core System</h2>
+        <div class="status-bar">
+            <span>状态: <span id="status-text" style="color:#00ffaa">就绪</span></span>
+            <span>Hands: <span id="hand-count">0</span></span>
+        </div>
         
-        <h3>录制新动作</h3>
-        <input type="text" id="gesture-name" placeholder="输入显示的文字">
-        <button onclick="recordGesture()">⏺ 录制当前姿态</button>
+        <input type="text" id="gesture-name" placeholder="输入动作名称 (如: 结印)">
         
-        <div class="meter-container">
-            <div style="font-size:12px; color:#aaa; display:flex; justify-content:space-between;">
-                <span>匹配度</span><span id="score-val">0%</span>
-            </div>
-            <div class="meter-bg"><div class="meter-fill" id="similarity-bar"></div></div>
+        <div style="font-size:11px; color:#aaa; margin-bottom:8px;">点击录制 -> 3秒倒计时 -> 做出动作 -> 再次点击停止</div>
+        <button id="record-btn" onclick="toggleRecording()">开始录制 (倒计时)</button>
+
+        <div class="match-info">
+            相似度匹配: <span id="score-val">0</span>
+            <div class="bar-bg"><div class="bar-fill" id="score-bar"></div></div>
         </div>
 
-        <h3>样式自定义</h3>
-        <div class="color-picker-wrap">
-            文字颜色
-            <input type="color" id="opt-color" value="#ffffff">
-        </div>
-        <div class="color-picker-wrap">
-            发光颜色
-            <input type="color" id="opt-glow" value="#00f2ff">
-        </div>
-        
-        <div style="margin-bottom:8px; font-size:12px; color:#ccc;">
-            字体大小: <span id="size-val">100</span>px
-            <input type="range" id="opt-size" min="40" max="250" value="100">
-        </div>
-        
-        <select id="opt-font">
-            <option value="'Segoe UI', sans-serif">默认黑体 (Default)</option>
-            <option value="'Orbitron', sans-serif">科幻风格 (Sci-Fi)</option>
-            <option value="'Black Ops One', cursive">军事风格 (Military)</option>
-            <option value="'Pacifico', cursive">手写风格 (Cursive)</option>
-            <option value="'Roboto Mono', monospace">代码风格 (Mono)</option>
-        </select>
+        <div class="list-wrap" id="gesture-list"></div>
 
-        <h3 style="margin-top:20px;">手势库</h3>
-        <div class="list-wrap">
-            <ul id="gesture-list"></ul>
-        </div>
-        
-        <button class="secondary" onclick="exportData()">📋 复制当前库数据 (供预设使用)</button>
-        <button class="secondary" onclick="clearStorage()" style="background:#552222;">🗑 清空本地数据</button>
+        <button onclick="exportData()" style="background:#333; margin-top:20px; font-size:12px; border:1px solid #555;">导出JSON数据</button>
     </div>
 
-    <div id="main-output">READY</div>
+    <div id="main-output">SYSTEM READY</div>
 </div>
 
 <script>
-    // ==========================================
-    // 1. 数据库与持久化配置
-    // ==========================================
-
-    // 【开发者预设区】
-    // 如果你想给所有人预设手势，请在网页上录制好，点击“复制当前库数据”，
-    // 然后把复制的 JSON 粘贴替换下面这个空数组 []。
-    const PRESET_DB = []; 
-
-    // 运行时数据
-    let knownGestures = [];
-
-    // 初始化：加载预设 + 本地存储
-    function initDatabase() {
-        // 1. 加载本地存储
-        const localData = localStorage.getItem('myHandGestures');
-        let localGestures = [];
-        if (localData) {
-            try { localGestures = JSON.parse(localData); } catch(e) { console.error(e); }
-        }
-
-        // 2. 合并数据 (去重：如果名字一样，优先用本地的)
-        const combined = [...localGestures];
-        PRESET_DB.forEach(preset => {
-            if (!combined.find(g => g.name === preset.name)) {
-                combined.push(preset);
-            }
-        });
-        
-        knownGestures = combined;
-        renderList();
-        applyStyles(); // 应用保存的样式
-    }
-
-    // 保存到本地存储
-    function saveToStorage() {
-        // 我们只保存用户新增的，实际上为了简单，我们保存当前完整列表
-        // 实际开发中可以区分，但在Demo中全量保存最稳妥
-        localStorage.setItem('myHandGestures', JSON.stringify(knownGestures));
-    }
-    
-    // 导出数据功能
-    window.exportData = function() {
-        const dataStr = JSON.stringify(knownGestures);
-        navigator.clipboard.writeText(dataStr).then(() => {
-            alert("数据已复制到剪贴板！\n\n请打开 index.html 代码，找到 'const PRESET_DB = []'，将内容粘贴进去即可实现预设。");
-        });
-    };
-
-    window.clearStorage = function() {
-        if(confirm("确定要清空所有本地手势吗？预设手势在刷新后会恢复。")) {
-            localStorage.removeItem('myHandGestures');
-            location.reload();
-        }
-    };
-
-    function deleteGesture(name) {
-        knownGestures = knownGestures.filter(g => g.name !== name);
-        saveToStorage();
-        renderList();
-    }
-
-    function renderList() {
-        const ul = document.getElementById('gesture-list');
-        ul.innerHTML = '';
-        knownGestures.forEach(g => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <span>${g.name} <span style="color:#666; font-size:10px;">(${g.type})</span></span>
-                <span class="del-btn" onclick="deleteGesture('${g.name}')">×</span>
-            `;
-            ul.appendChild(li);
-        });
-    }
-
-    // ==========================================
-    // 2. 样式自定义逻辑
-    // ==========================================
-    const mainOutput = document.getElementById('main-output');
-    const inputColor = document.getElementById('opt-color');
-    const inputGlow = document.getElementById('opt-glow');
-    const inputSize = document.getElementById('opt-size');
-    const inputFont = document.getElementById('opt-font');
-    const sizeVal = document.getElementById('size-val');
-
-    // 加载样式设置
-    function applyStyles() {
-        const savedStyle = JSON.parse(localStorage.getItem('gestureStyle')) || {};
-        if(savedStyle.color) inputColor.value = savedStyle.color;
-        if(savedStyle.glow) inputGlow.value = savedStyle.glow;
-        if(savedStyle.size) inputSize.value = savedStyle.size;
-        if(savedStyle.font) inputFont.value = savedStyle.font;
-        updateMainOutput();
-    }
-
-    function updateMainOutput() {
-        const color = inputColor.value;
-        const glow = inputGlow.value;
-        const size = inputSize.value;
-        const font = inputFont.value;
-
-        sizeVal.textContent = size;
-        
-        mainOutput.style.color = color;
-        mainOutput.style.fontSize = `${size}px`;
-        mainOutput.style.fontFamily = font;
-        // 动态生成阴影
-        mainOutput.style.textShadow = `0 0 20px ${glow}, 0 0 40px ${glow}`;
-
-        // 保存样式偏好
-        localStorage.setItem('gestureStyle', JSON.stringify({
-            color, glow, size, font
-        }));
-    }
-
-    // 绑定事件
-    inputColor.addEventListener('input', updateMainOutput);
-    inputGlow.addEventListener('input', updateMainOutput);
-    inputSize.addEventListener('input', updateMainOutput);
-    inputFont.addEventListener('change', updateMainOutput);
-
-
-    // ==========================================
-    // 3. Three.js 粒子系统 (保持原版逻辑)
-    // ==========================================
+    // ============================================
+    // 1. Three.js 实体化机械手 (支持双手)
+    // ============================================
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x050505, 0.02);
+    scene.fog = new THREE.FogExp2(0x000000, 0.02);
+
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 0, 20);
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false });
+    camera.position.set(0, 2, 20); 
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
     document.getElementById('container').appendChild(renderer.domElement);
 
-    function getParticleTexture() {
-        const canvas = document.createElement('canvas');
-        canvas.width = 32; canvas.height = 32;
-        const ctx = canvas.getContext('2d');
-        const grad = ctx.createRadialGradient(16,16,0, 16,16,16);
-        grad.addColorStop(0, 'rgba(200, 255, 255, 1)');
-        grad.addColorStop(0.4, 'rgba(0, 180, 255, 0.5)');
-        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0,0,32,32);
-        return new THREE.Texture(canvas);
-    }
-    const particleTex = getParticleTexture();
+    // 灯光
+    const ambientLight = new THREE.AmbientLight(0x404040);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight.position.set(5, 10, 7);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+    const pointLight = new THREE.PointLight(0x00ffaa, 1, 30);
+    pointLight.position.set(0, 5, 5);
+    scene.add(pointLight);
+
+    // 材质
+    const jointMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.1, metalness: 0.9 });
+    const boneMatLeft = new THREE.MeshStandardMaterial({ color: 0x00ffaa, roughness: 0.2, metalness: 0.5, emissive: 0x004433, emissiveIntensity: 0.4 });
+    const boneMatRight = new THREE.MeshStandardMaterial({ color: 0xff0055, roughness: 0.2, metalness: 0.5, emissive: 0x440011, emissiveIntensity: 0.4 });
 
     const BONE_CONNECTIONS = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[0,9],[9,10],[10,11],[11,12],[0,13],[13,14],[14,15],[15,16],[0,17],[17,18],[18,19],[19,20],[5,9],[9,13],[13,17],[0,17],[0,5]];
 
-    class VolumetricHand {
-        constructor(color = 0x00f2ff) {
-            this.particleCount = 3000;
-            this.geometry = new THREE.BufferGeometry();
-            const positions = new Float32Array(this.particleCount * 3);
-            this.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            const material = new THREE.PointsMaterial({
-                color: color, size: 0.6, map: particleTex, transparent: true, opacity: 0.8,
-                blending: THREE.AdditiveBlending, depthWrite: false
+    class SolidHand {
+        constructor(isRight) {
+            this.group = new THREE.Group();
+            scene.add(this.group);
+            this.joints = [];
+            this.bones = [];
+            
+            const boneMat = isRight ? boneMatRight : boneMatLeft;
+
+            const sphereGeo = new THREE.SphereGeometry(0.45, 16, 16);
+            for(let i=0; i<21; i++) {
+                const mesh = new THREE.Mesh(sphereGeo, jointMat);
+                mesh.castShadow = true;
+                this.joints.push(mesh);
+                this.group.add(mesh);
+            }
+
+            const cylinderGeo = new THREE.CylinderGeometry(0.25, 0.25, 1, 8);
+            cylinderGeo.translate(0, 0.5, 0); 
+            cylinderGeo.rotateX(Math.PI / 2);
+            
+            BONE_CONNECTIONS.forEach(pair => {
+                const bone = new THREE.Mesh(cylinderGeo, boneMat);
+                bone.castShadow = true;
+                this.bones.push({ mesh: bone, start: pair[0], end: pair[1] });
+                this.group.add(bone);
             });
-            this.mesh = new THREE.Points(this.geometry, material);
-            this.mesh.visible = false;
-            scene.add(this.mesh);
-            this.distribution = [];
-            const particlesPerBone = Math.floor(this.particleCount / BONE_CONNECTIONS.length);
-            BONE_CONNECTIONS.forEach((pair, i) => {
-                let thickness = (i >= 20) ? 1.5 : (pair[1] % 4 === 0 ? 0.5 : 0.8);
-                this.distribution.push({
-                    startJoint: pair[0], endJoint: pair[1],
-                    startIndex: i * particlesPerBone, count: particlesPerBone, thickness: thickness
-                });
-            });
-            this.worldJoints = Array(21).fill().map(() => new THREE.Vector3());
         }
 
         update(landmarks) {
-            if (!landmarks) { this.mesh.visible = false; return; }
-            this.mesh.visible = true;
+            if (!landmarks) { this.group.visible = false; return; }
+            this.group.visible = true;
+            const worldPositions = [];
             landmarks.forEach((lm, i) => {
-                const x = (0.5 - lm.x) * 30;
-                const y = (0.5 - lm.y) * 25;
+                const x = (0.5 - lm.x) * 32;
+                const y = (0.5 - lm.y) * 26;
                 const z = lm.z * -30;
-                this.worldJoints[i].set(x, y, z);
+                this.joints[i].position.set(x, y, z);
+                worldPositions.push(new THREE.Vector3(x, y, z));
             });
-            const positions = this.geometry.attributes.position.array;
-            this.distribution.forEach(bone => {
-                const startPos = this.worldJoints[bone.startJoint];
-                const endPos = this.worldJoints[bone.endJoint];
-                const vec = new THREE.Vector3().subVectors(endPos, startPos);
-                for (let j = 0; j < bone.count; j++) {
-                    const idx = (bone.startIndex + j) * 3;
-                    const t = j / bone.count;
-                    positions[idx] = startPos.x + vec.x * t + (Math.random()-0.5)*bone.thickness;
-                    positions[idx+1] = startPos.y + vec.y * t + (Math.random()-0.5)*bone.thickness;
-                    positions[idx+2] = startPos.z + vec.z * t + (Math.random()-0.5)*bone.thickness;
-                }
+            this.bones.forEach(b => {
+                const startPos = worldPositions[b.start];
+                const endPos = worldPositions[b.end];
+                b.mesh.position.copy(startPos);
+                b.mesh.lookAt(endPos);
+                const distance = startPos.distanceTo(endPos);
+                b.mesh.scale.set(1, 1, distance);
             });
-            this.geometry.attributes.position.needsUpdate = true;
         }
     }
 
-    const leftHandVisual = new VolumetricHand(0x00f2ff);
-    const rightHandVisual = new VolumetricHand(0xff0055);
-    
-    // ==========================================
-    // 4. 手势识别核心
-    // ==========================================
-    let currentFrameData = { left: null, right: null };
-    let lastProcessTime = 0;
-    const processInterval = 50;
+    // 两个实体手实例
+    const leftHandVisual = new SolidHand(false); // 蓝绿色
+    const rightHandVisual = new SolidHand(true); // 红色
 
-    function getNormalizedFeatures(landmarks) {
-        const wrist = landmarks[0];
-        let maxDist = 0;
-        landmarks.forEach(p => {
-            const d = Math.sqrt((p.x-wrist.x)**2 + (p.y-wrist.y)**2 + (p.z-wrist.z)**2);
-            if(d > maxDist) maxDist = d;
-        });
-        if(maxDist === 0) maxDist = 1;
-        return landmarks.map(p => ({
-            x: (p.x - wrist.x) / maxDist,
-            y: (p.y - wrist.y) / maxDist,
-            z: (p.z - wrist.z) / maxDist
-        }));
-    }
 
-    function calculateError(l1, l2) {
-        let totalError = 0;
-        for (let i = 0; i < 21; i++) {
-            totalError += ((l1[i].x - l2[i].x)**2 + (l1[i].y - l2[i].y)**2 + (l1[i].z - l2[i].z)**2);
-        }
-        return totalError;
-    }
+    // ============================================
+    // 2. 双手 DTW 核心逻辑
+    // ============================================
 
-    // 录制并保存
-    window.recordGesture = function() {
-        const name = document.getElementById('gesture-name').value.trim();
-        const hasLeft = !!currentFrameData.left;
-        const hasRight = !!currentFrameData.right;
+    let isRecording = false;
+    let recordedBuffer = []; 
+    const LIVE_BUFFER_SIZE = 45; // 历史窗口大小
+    let liveBuffer = []; 
+    let gestureDB = []; 
+
+    // 初始化加载
+    const savedData = localStorage.getItem('dualHandGestures');
+    if(savedData) { gestureDB = JSON.parse(savedData); renderList(); }
+
+    // 特征提取：核心变更
+    // 返回一个长向量 [Left_Feats(15), Right_Feats(15)]
+    // 如果某只手不存在，用0填充
+    function extractDualFeatures(leftLM, rightLM) {
+        let feats = [];
         
-        if(!name) return alert("请输入手势名称");
-        if(!hasLeft && !hasRight) return alert("未检测到手部");
-
-        const newGesture = {
-            name: name,
-            type: (hasLeft && hasRight) ? 'double' : 'single',
-            data: {}
+        const processHand = (landmarks) => {
+            if(!landmarks) return Array(15).fill(0);
+            const wrist = landmarks[0];
+            let scale = 0;
+            // 计算尺度用于归一化
+            landmarks.forEach(p => {
+                const d = Math.sqrt((p.x-wrist.x)**2 + (p.y-wrist.y)**2 + (p.z-wrist.z)**2);
+                if(d > scale) scale = d;
+            });
+            if (scale === 0) scale = 1;
+            
+            const handFeats = [];
+            // 取5个指尖相对于手腕的位置
+            [4, 8, 12, 16, 20].forEach(idx => {
+                handFeats.push((landmarks[idx].x - wrist.x) / scale);
+                handFeats.push((landmarks[idx].y - wrist.y) / scale);
+                handFeats.push((landmarks[idx].z - wrist.z) / scale);
+            });
+            return handFeats;
         };
 
-        if(hasLeft) newGesture.data.left = getNormalizedFeatures(currentFrameData.left);
-        if(hasRight) newGesture.data.right = getNormalizedFeatures(currentFrameData.right);
+        // 拼接：先左后右
+        feats = feats.concat(processHand(leftLM));
+        feats = feats.concat(processHand(rightLM));
+        return feats;
+    }
 
-        knownGestures.push(newGesture);
-        saveToStorage(); // 保存！
-        renderList();
-        
-        document.getElementById('gesture-name').value = '';
+    function computeDTW(seq1, seq2) {
+        const n = seq1.length;
+        const m = seq2.length;
+        // 简单DTW矩阵
+        const dtw = Array(n + 1).fill(null).map(() => Array(m + 1).fill(Infinity));
+        dtw[0][0] = 0;
+
+        for (let i = 1; i <= n; i++) {
+            for (let j = 1; j <= m; j++) {
+                const cost = vectorDistance(seq1[i-1], seq2[j-1]);
+                dtw[i][j] = cost + Math.min(dtw[i-1][j], dtw[i][j-1], dtw[i-1][j-1]);
+            }
+        }
+        return dtw[n][m] / (n + m);
+    }
+
+    function vectorDistance(v1, v2) {
+        let sum = 0;
+        // v1, v2 长度都是 30
+        for(let i=0; i<v1.length; i++) sum += (v1[i] - v2[i]) ** 2;
+        return Math.sqrt(sum);
+    }
+
+    // ============================================
+    // 3. 录制与倒计时控制
+    // ============================================
+
+    const recordBtn = document.getElementById('record-btn');
+    const countdownOverlay = document.getElementById('countdown-overlay');
+    const countdownText = document.getElementById('countdown-text');
+    let recordingTimer = null;
+
+    window.toggleRecording = function() {
+        if (isRecording) {
+            finishRecording(); // 如果正在录，点击则停止
+        } else {
+            startCountdownSequence(); // 如果没录，点击开始倒数
+        }
     };
 
-    const scoreBar = document.getElementById('similarity-bar');
-    const scoreVal = document.getElementById('score-val');
-    let outputTimer = null;
+    function startCountdownSequence() {
+        const name = document.getElementById('gesture-name').value.trim();
+        if(!name) { alert("请先输入动作名称"); return; }
 
-    function processGestures() {
-        if(knownGestures.length === 0) return;
-        let bestMatch = null;
-        let minError = Infinity;
-        const THRESHOLD = 0.4; 
+        // 显示遮罩
+        countdownOverlay.style.display = 'flex';
+        let count = 3;
+        countdownText.textContent = count;
 
-        knownGestures.forEach(gesture => {
-            let currentError = 0;
-            let matchCount = 0;
-            let requiredCount = 0;
+        const timer = setInterval(() => {
+            count--;
+            if (count > 0) {
+                countdownText.textContent = count;
+            } else if (count === 0) {
+                countdownText.textContent = "GO!";
+            } else {
+                clearInterval(timer);
+                countdownOverlay.style.display = 'none';
+                startCapture();
+            }
+        }, 1000);
+    }
+
+    function startCapture() {
+        isRecording = true;
+        recordedBuffer = [];
+        recordBtn.textContent = "停止录制 (点击结束)";
+        recordBtn.classList.add('recording');
+        document.getElementById('status-text').textContent = "正在录制...";
+        document.getElementById('status-text').style.color = "#ff4444";
+    }
+
+    function finishRecording() {
+        isRecording = false;
+        recordBtn.textContent = "开始录制 (倒计时)";
+        recordBtn.classList.remove('recording');
+        document.getElementById('status-text').textContent = "就绪";
+        document.getElementById('status-text').style.color = "#00ffaa";
+
+        if (recordedBuffer.length < 10) {
+            alert("动作时间太短，请重试！");
+            return;
+        }
+
+        const name = document.getElementById('gesture-name').value.trim();
+        gestureDB.push({
+            name: name,
+            sequence: JSON.parse(JSON.stringify(recordedBuffer))
+        });
+        
+        renderList();
+        localStorage.setItem('dualHandGestures', JSON.stringify(gestureDB));
+        
+        showOutput(`录制完成: ${name}`);
+    }
+
+    // ============================================
+    // 4. 实时识别循环
+    // ============================================
+    
+    let lastRecognizeTime = 0;
+
+    function recognize() {
+        if(gestureDB.length === 0 || liveBuffer.length < 15) return;
+
+        let bestScore = Infinity;
+        let bestName = null;
+
+        gestureDB.forEach(gesture => {
+            // 截取与目标等长的实时片段
+            const len = gesture.sequence.length;
+            if(liveBuffer.length < len) return;
             
-            if (gesture.data.left) { requiredCount++; if (currentFrameData.left) { currentError += calculateError(gesture.data.left, getNormalizedFeatures(currentFrameData.left)); matchCount++; } else { currentError += 10; } }
-            if (gesture.data.right) { requiredCount++; if (currentFrameData.right) { currentError += calculateError(gesture.data.right, getNormalizedFeatures(currentFrameData.right)); matchCount++; } else { currentError += 10; } }
-
-            const avgError = currentError / (requiredCount || 1);
-            if (matchCount === requiredCount && avgError < minError) {
-                minError = avgError;
-                bestMatch = gesture.name;
+            const liveClip = liveBuffer.slice(liveBuffer.length - len);
+            const score = computeDTW(liveClip, gesture.sequence);
+            
+            if(score < bestScore) {
+                bestScore = score;
+                bestName = gesture.name;
             }
         });
 
-        let confidence = 0;
-        if (minError < 2.0) confidence = Math.max(0, 1 - (minError / 0.8)) * 100;
-        scoreBar.style.width = `${confidence}%`;
-        scoreVal.textContent = `${Math.round(confidence)}%`;
-        if (minError < THRESHOLD) {
-            scoreBar.style.background = "#00ff88";
-            if (mainOutput.textContent !== bestMatch || !mainOutput.classList.contains('active')) {
-                mainOutput.textContent = bestMatch;
-                mainOutput.classList.add('active');
-                if (outputTimer) clearTimeout(outputTimer);
-                outputTimer = setTimeout(() => { mainOutput.classList.remove('active'); }, 1500);
-            }
-        } else {
-            scoreBar.style.background = "#00f2ff";
+        // UI Feedback
+        let visualScore = Math.max(0, 1 - bestScore/1.2) * 100;
+        document.getElementById('score-val').textContent = bestScore.toFixed(3);
+        document.getElementById('score-bar').style.width = `${visualScore}%`;
+
+        // 阈值：值越小越相似。双手数据量大，误差会累积，阈值可以适当放宽到 0.6-0.8
+        if (bestScore < 0.65) {
+            showOutput(bestName);
+            liveBuffer = []; // 触发后清空，防连击
         }
     }
 
-    // MediaPipe Setup
+    function showOutput(text) {
+        const el = document.getElementById('main-output');
+        el.textContent = text;
+        el.classList.add('active');
+        setTimeout(() => el.classList.remove('active'), 1500);
+    }
+
+    function renderList() {
+        const list = document.getElementById('gesture-list');
+        list.innerHTML = '';
+        gestureDB.forEach((g, i) => {
+            const div = document.createElement('div');
+            div.className = 'gesture-item';
+            div.innerHTML = `<span>${g.name} <span style="color:#666;font-size:10px">${g.sequence.length}帧</span></span> <span class="del-btn" onclick="delGesture(${i})">×</span>`;
+            list.appendChild(div);
+        });
+    }
+
+    window.delGesture = function(i) {
+        gestureDB.splice(i, 1);
+        renderList();
+        localStorage.setItem('dualHandGestures', JSON.stringify(gestureDB));
+    }
+    
+    window.exportData = function() {
+        navigator.clipboard.writeText(JSON.stringify(gestureDB));
+        alert("已复制到剪贴板！");
+    }
+
+    // ============================================
+    // 5. MediaPipe & Render Loop
+    // ============================================
+    
     const videoElem = document.getElementById('input-video');
+    const handCountElem = document.getElementById('hand-count');
+    
     function onResults(results) {
-        currentFrameData.left = null; currentFrameData.right = null;
+        let leftLM = null;
+        let rightLM = null;
+        let count = 0;
+
+        // 隐藏
+        leftHandVisual.update(null);
+        rightHandVisual.update(null);
+
         if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-            leftHandVisual.update(null); rightHandVisual.update(null);
+            count = results.multiHandLandmarks.length;
             results.multiHandLandmarks.forEach((landmarks, index) => {
                 const label = results.multiHandedness[index].label;
-                if (label === 'Left') { rightHandVisual.update(landmarks); currentFrameData.right = landmarks; }
-                else { leftHandVisual.update(landmarks); currentFrameData.left = landmarks; }
+                // 注意：MP 前置摄像头镜像后，label Left 对应屏幕显示的 Right Hand Visual
+                // 这里我们统一定义： label "Left" -> 存在 currentLeft, 渲染用 leftVisual
+                // 但因为 mirror，视觉上我们可能需要交换一下，或者保持一致
+                // 为了逻辑简单：Label Left 就归入 Left 数据槽
+                
+                if (label === 'Right') {
+                    rightHandVisual.update(landmarks);
+                    rightLM = landmarks;
+                } else {
+                    leftHandVisual.update(landmarks);
+                    leftLM = landmarks;
+                }
             });
-        } else {
-            leftHandVisual.update(null); rightHandVisual.update(null);
         }
-        const now = Date.now();
-        if (now - lastProcessTime > processInterval) { processGestures(); lastProcessTime = now; }
+        handCountElem.textContent = count;
+
+        // 特征提取 (包含两只手，缺少的补0)
+        const feats = extractDualFeatures(leftLM, rightLM);
+
+        if (isRecording) {
+            recordedBuffer.push(feats);
+        } else {
+            liveBuffer.push(feats);
+            if(liveBuffer.length > LIVE_BUFFER_SIZE) liveBuffer.shift();
+            
+            const now = Date.now();
+            if(now - lastRecognizeTime > 200) { // 200ms 检测一次
+                recognize();
+                lastRecognizeTime = now;
+            }
+        }
+
         renderer.render(scene, camera);
     }
 
     const hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
-    hands.setOptions({ maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+    hands.setOptions({
+        maxNumHands: 2, // 开启双手
+        modelComplexity: 1,
+        minDetectionConfidence: 0.8, // 高置信度减少幽灵手
+        minTrackingConfidence: 0.8
+    });
     hands.onResults(onResults);
-    new Camera(videoElem, { onFrame: async () => { await hands.send({image: videoElem}); }, width: 1280, height: 720 }).start();
-    window.addEventListener('resize', () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
 
-    // 启动初始化
-    initDatabase();
+    new Camera(videoElem, {
+        onFrame: async () => { await hands.send({image: videoElem}); },
+        width: 1280, height: 720
+    }).start();
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
 
 </script>
 </body>
